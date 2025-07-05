@@ -1,73 +1,60 @@
-# Welcome to your Lovable project
+# 밥뭐먹
+[url](https://lovable.dev/projects/5afbb4c2-1538-4499-aec9-21f5d6602eb2)
 
-## Project info
+### 페르소나
 
-**URL**: https://lovable.dev/projects/5afbb4c2-1538-4499-aec9-21f5d6602eb2
+이름 : 김머핀
 
-## How can I edit this code?
+나이 : 24세
 
-There are several ways of editing your application.
+역할 : 10조 팀원
 
-**Use Lovable**
+목표 : 일주일간 모두의 입맛에 맞는 점심 메뉴 고르기
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/5afbb4c2-1538-4499-aec9-21f5d6602eb2) and start prompting.
 
-Changes made via Lovable will be committed automatically to this repo.
+### 사용자 시나리오
 
-**Use your preferred IDE**
+머핀은 이번 주 점심 메뉴 고르기 담당이 되었다. 머핀의 데일리 조에는 까탈스러운 크루가 많아 고민이다. 회를 좋아하지 않아 초밥/연어덮밥 등의 메뉴를 먹을 수 없는 카멜, 다이어트 중이라 칼로리가 높지 않은 음식을 원하는 수이, 뭐든 잘 먹지만 어제 치킨을 먹어서 오늘은 먹고싶지 않다는 랜디가 모두 만족하는 메뉴를 골라야 한다.
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+1. ㅇㅇ페이지에 접속하여 팀 생성 버튼을 누른다.
+2. 팀 이름을 ‘우테코 레벨1 10조’로 설정한 뒤 초대 링크를 팀원들에게 전송한다.
+3. 카멜이 ㅇㅇ페이지의 회원으로 링크에 접속한다. 미리 설정해 둔 기피 음식 정보 ‘회가 들어간 음식’(문장)이 연동되어 ‘우테코 레벨1 10조 카멜의 제외 음식’으로 표시된다.
+4. 수이는 사용하기 귀찮다며 페이지 접속을 거부하여 머핀이 수동으로 +버튼을 눌러 팀원 이름을 ‘수이’로 설정한다.
+5. 머핀은 수이의 ‘기피 음식’으로 ‘칼로리가 높은 음식’을 입력/’선호 음식’으로 ‘샐러드, 포케’를 입력하여 설정한다.
+6. 랜디는 ㅇㅇ페이지에 접속하여 회원 가입한 후 선호 음식으로 ‘피자’, ‘가성비 음식’를 입력하여 설정한다. 이후 제외 음식으로 ‘치킨’을 입력한 뒤 ‘하루만’ 체크 박스를 선택한다.
+7. 머핀은 너무 더워서 선호 음식으로 ‘시원한 음식’을 설정한 뒤 ‘하루만’ 체크 박스를 선택한다.
+8. ‘이번주 우리 팀이 먹은 음식’탭에는 ‘정보 x’가 표시된다.
+9. 머핀이 팀원의 ‘제외 음식’과 ‘선호 음식’을 한 눈에 확인한다.
+10. ‘추천 메뉴’ 버튼을 클릭하여 ai가 팀원의 선호 음식/기피 음식 정보를 고려하여 추천한 1가지 메뉴를 확인한다.
+11. 칼로리가 높지 않으면서 시원하고 회/치킨을 제외한 음식인 콩국수가 표시된다.
+12. 머핀은 콩국수가 마음에 들지 않아 ‘다시 추천’ 버튼을 클릭한다.
+13. 다시 한 번 추천된 메뉴 냉우동으로 결정한다.
+14. ‘이번 주 우리 팀이 먹은 음식’에 등록되도록 ‘냉우동’을 ‘오늘 우리팀이 먹은 음식’에 등록한다.
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
 
-Follow these steps:
+### 요약
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+나의 선호 음식/기피 음식을 문장 형태로 입력하여 설정 ⇒ 팀 생성 ⇒ 팀원 초대 ⇒ 회원이 아닌 팀원의 선호 음식/기피 음식 정보는 수동으로 입력 ⇒ 메뉴 추천 ⇒  오늘 먹은 음식 설정
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
 
-# Step 3: Install the necessary dependencies.
-npm i
+### 페인 포인트
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+- 팀원의 취향 및 최근 먹은 음식을 일일이 기억하기 힘들다.
+- 여러 메뉴 중 한 가지를 결정하기 힘들다.
+ 
 
-**Edit a file directly in GitHub**
+### 기대 효과
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+- 페이지 접속 및 가입이 부담스러운 사람의 정보는 수동으로 입력하는 기능으로 참여율을 높였습니다.
+- 기피/선호 음식 입력 형식을 구체적인 메뉴명(짜장면, 피자 등)이 아닌 자유 형식(중식, 버섯이 들어간 음식)으로 두어 사용자의 편리함을 증진시켰습니다.
+- 그 날 하루만 선호/기피하는 음식을 정보 설정 기능으로 사용자가 선호/기피 메뉴를 매번 수정해야 하는 불편함을 덜었습니다.
+- ai가 팀원의 기피/선호 음식, 이번 주에 우리 팀이 먹은 음식을 고려하여 한 번에 1가지 메뉴를 추천해주는 방식으로 메뉴를 일일이 확인하거나 고르기 힘든 고민을 해결했습니다.
+- 이번 주 먹은 음식의 ‘추천 제외’ 여부를 선택할 수 있는 기능으로 추천 범위 조절이 쉽도록 했습니다.
+  
 
-**Use GitHub Codespaces**
+### 추가 의견(구현x)
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/5afbb4c2-1538-4499-aec9-21f5d6602eb2) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+- 오늘의 메뉴 후보 등록 및 투표
+- 메뉴 추천 시 이미지 포함
+- 비로그인 시에도 일부 기능 활성화(팀생성, 선호/기피 음식 정보 기억)
+- 연동하지 않아도 팀 생성 시 자동으로 나의 선호/기피 음식 정보 등록
