@@ -1,5 +1,5 @@
 # 밥뭐먹
-[url]([https://lovable.dev/projects/5afbb4c2-1538-4499-aec9-21f5d6602eb2](https://bobmomok.lovable.app))
+[url]([(https://bobmomok.lovable.app)])
 
 ### 페르소나
 
