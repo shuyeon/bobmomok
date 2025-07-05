@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -5,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import { ArrowLeft, Plus, Sparkles, RefreshCw, Users, History, Copy, Share } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useUser, Team } from "@/contexts/UserContext";
@@ -114,6 +116,11 @@ const TeamDashboard = ({ team, setTeam }: Props) => {
       ...member.temporaryDislikes.map(td => td.food)
     ]);
 
+    // 추천에서 제외할 음식들 (excluded가 false인 것들만)
+    const excludedFoods = currentTeam.eatenFoods
+      .filter(food => !food.excluded)
+      .map(food => food.name);
+
     // 선호도/기피 정보가 있는 경우의 추천
     const recommendationsWithPreferences = [
       "콩국수 - 시원하고 칼로리가 낮으며, 회나 치킨이 들어가지 않은 건강한 메뉴입니다",
@@ -140,10 +147,20 @@ const TeamDashboard = ({ team, setTeam }: Props) => {
       ? recommendationsWithPreferences 
       : randomRecommendations;
 
+    // 이미 먹은 음식 제외하고 필터링
+    const filteredRecommendations = possibleRecommendations.filter(rec => {
+      const foodName = rec.split(' - ')[0];
+      return !excludedFoods.includes(foodName);
+    });
+
+    const finalRecommendations = filteredRecommendations.length > 0 
+      ? filteredRecommendations 
+      : possibleRecommendations;
+
     // 2초 후 추천 결과 반환
     setTimeout(() => {
-      const randomRecommendation = possibleRecommendations[
-        Math.floor(Math.random() * possibleRecommendations.length)
+      const randomRecommendation = finalRecommendations[
+        Math.floor(Math.random() * finalRecommendations.length)
       ];
       setRecommendation(randomRecommendation);
       setIsLoading(false);
@@ -170,7 +187,7 @@ const TeamDashboard = ({ team, setTeam }: Props) => {
 
     const updatedTeam = {
       ...currentTeam,
-      eatenFoods: [...currentTeam.eatenFoods, foodToAdd],
+      eatenFoods: [...currentTeam.eatenFoods, { name: foodToAdd, excluded: false }],
     };
     
     setCurrentTeam(updatedTeam);
@@ -183,6 +200,16 @@ const TeamDashboard = ({ team, setTeam }: Props) => {
       title: "오늘의 메뉴가 등록되었습니다! 📝",
       description: `${foodToAdd}가(이) 이번 주 메뉴에 추가되었습니다.`,
     });
+  };
+
+  const toggleFoodExclusion = (index: number) => {
+    const updatedTeam = {
+      ...currentTeam,
+      eatenFoods: currentTeam.eatenFoods.map((food, i) => 
+        i === index ? { ...food, excluded: !food.excluded } : food
+      ),
+    };
+    setCurrentTeam(updatedTeam);
   };
 
   return (
@@ -303,7 +330,6 @@ const TeamDashboard = ({ team, setTeam }: Props) => {
               </CardContent>
             </Card>
 
-            {/* Members List */}
             <div className="grid gap-4">
               {currentTeam.members.length === 0 ? (
                 <Card className="border-0 shadow-lg bg-white/90 backdrop-blur-sm">
@@ -326,7 +352,6 @@ const TeamDashboard = ({ team, setTeam }: Props) => {
           </TabsContent>
 
           <TabsContent value="recommendation" className="space-y-6">
-            
             <Card className="border-0 shadow-lg bg-white/90 backdrop-blur-sm">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -368,7 +393,6 @@ const TeamDashboard = ({ team, setTeam }: Props) => {
           </TabsContent>
 
           <TabsContent value="history" className="space-y-6">
-            
             <Card className="border-0 shadow-lg bg-white/90 backdrop-blur-sm">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -380,11 +404,30 @@ const TeamDashboard = ({ team, setTeam }: Props) => {
                 {currentTeam.eatenFoods.length === 0 ? (
                   <p className="text-center text-gray-500 py-8">정보 x</p>
                 ) : (
-                  <div className="flex flex-wrap gap-2">
+                  <div className="space-y-3">
+                    <div className="text-sm text-gray-600 mb-2">
+                      추천에서 제외할 음식을 체크 해제하세요
+                    </div>
                     {currentTeam.eatenFoods.map((food, index) => (
-                      <Badge key={index} variant="secondary" className="text-sm">
-                        {food}
-                      </Badge>
+                      <div key={index} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`food-${index}`}
+                          checked={!food.excluded}
+                          onCheckedChange={() => toggleFoodExclusion(index)}
+                        />
+                        <Label 
+                          htmlFor={`food-${index}`} 
+                          className={`flex-1 ${food.excluded ? 'line-through text-gray-400' : ''}`}
+                        >
+                          {food.name}
+                        </Label>
+                        <Badge 
+                          variant={food.excluded ? "secondary" : "default"} 
+                          className="text-xs"
+                        >
+                          {food.excluded ? "추천 제외" : "추천에서 제외"}
+                        </Badge>
+                      </div>
                     ))}
                   </div>
                 )}

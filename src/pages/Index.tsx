@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { PlusCircle, Users, Utensils, Sparkles, LogOut, User as UserIcon, Heart, X, Plus } from "lucide-react";
+import { PlusCircle, Users, Utensils, LogOut, User as UserIcon, Heart, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useUser, Team } from "@/contexts/UserContext";
 import TeamDashboard from "@/components/TeamDashboard";
@@ -14,7 +14,6 @@ const Index = () => {
   const [currentTeam, setCurrentTeam] = useState<Team | null>(null);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [teamName, setTeamName] = useState("");
-  const [showUserPreferences, setShowUserPreferences] = useState(false);
   const [newPreference, setNewPreference] = useState("");
   const [newDislike, setNewDislike] = useState("");
   const { toast } = useToast();
@@ -120,18 +119,18 @@ const Index = () => {
           <CardHeader className="text-center">
             <div className="flex items-center justify-center mb-4">
               <Utensils className="w-8 h-8 text-orange-500 mr-2" />
-              <h1 className="text-2xl font-bold text-gradient">맛있는 점심</h1>
+              <h1 className="text-2xl font-bold text-gradient">밥뭐먹</h1>
             </div>
             <CardTitle>로그인</CardTitle>
             <CardDescription>점심 메뉴 추천 서비스에 오신 것을 환영합니다</CardDescription>
           </CardHeader>
           <CardContent>
             <Button 
-              onClick={() => setUser({ id: 'demo-user', name: '김머핀', preferences: [], dislikes: [] })}
+              onClick={() => setUser({ id: 'demo-user', name: '김수이', preferences: [], dislikes: [] })}
               className="w-full gradient-food text-white font-semibold py-3 rounded-xl"
               size="lg"
             >
-              김머핀으로 로그인
+              김수이로 로그인
             </Button>
           </CardContent>
         </Card>
@@ -151,7 +150,7 @@ const Index = () => {
           <div className="text-center flex-1">
             <div className="flex items-center justify-center mb-4">
               <Utensils className="w-12 h-12 text-orange-500 mr-3" />
-              <h1 className="text-5xl font-bold text-gradient">맛있는 점심</h1>
+              <h1 className="text-5xl font-bold text-gradient">밥뭐먹</h1>
             </div>
             <p className="text-xl text-gray-600">
               {user.name}님 환영합니다! 팀원들의 취향을 고려한 AI 점심 메뉴 추천 서비스
@@ -277,45 +276,6 @@ const Index = () => {
             </div>
           </div>
         )}
-
-        {/* Features */}
-        <div className="grid md:grid-cols-3 gap-6 mb-12">
-          <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
-            <CardHeader className="text-center">
-              <Users className="w-8 h-8 text-orange-500 mx-auto mb-2" />
-              <CardTitle className="text-lg">팀 관리</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-600 text-center">
-                팀원들의 선호도와 기피 음식을 쉽게 관리하세요
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
-            <CardHeader className="text-center">
-              <Sparkles className="w-8 h-8 text-yellow-500 mx-auto mb-2" />
-              <CardTitle className="text-lg">AI 추천</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-600 text-center">
-                모든 팀원이 만족할 수 있는 메뉴를 AI가 추천해드려요
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
-            <CardHeader className="text-center">
-              <Utensils className="w-8 h-8 text-red-500 mx-auto mb-2" />
-              <CardTitle className="text-lg">히스토리</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-600 text-center">
-                이번 주 먹은 음식을 기록하고 중복을 피해보세요
-              </p>
-            </CardContent>
-          </Card>
-        </div>
 
         {/* Create Team Section */}
         <div className="max-w-md mx-auto">

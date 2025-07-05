@@ -12,7 +12,7 @@ interface Team {
   id: string;
   name: string;
   members: TeamMember[];
-  eatenFoods: string[];
+  eatenFoods: { name: string; excluded: boolean }[];
   createdBy: string;
 }
 
@@ -38,12 +38,7 @@ interface UserContextType {
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export const UserProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>({
-    id: 'demo-user',
-    name: '김머핀',
-    preferences: [],
-    dislikes: []
-  });
+  const [user, setUser] = useState<User | null>(null);
   const [teams, setTeams] = useState<Team[]>([]);
 
   const updateUser = (updatedUser: User) => {
