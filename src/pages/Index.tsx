@@ -1,30 +1,15 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { PlusCircle, Users, Utensils, Sparkles } from "lucide-react";
+import { PlusCircle, Users, Utensils, Sparkles, LogOut } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useUser, Team } from "@/contexts/UserContext";
 import TeamDashboard from "@/components/TeamDashboard";
 
-interface Team {
-  id: string;
-  name: string;
-  members: TeamMember[];
-  eatenFoods: string[];
-}
-
-interface TeamMember {
-  id: string;
-  name: string;
-  preferences: string[];
-  dislikes: string[];
-  temporaryPreferences: { food: string; isOneDay: boolean }[];
-  temporaryDislikes: { food: string; isOneDay: boolean }[];
-}
-
 const Index = () => {
+  const { user, teams, addTeam, setUser } = useUser();
   const [currentTeam, setCurrentTeam] = useState<Team | null>(null);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [teamName, setTeamName] = useState("");
@@ -44,8 +29,10 @@ const Index = () => {
       name: teamName,
       members: [],
       eatenFoods: [],
+      createdBy: user!.id,
     };
 
+    addTeam(newTeam);
     setCurrentTeam(newTeam);
     setTeamName("");
     setShowCreateForm(false);
@@ -56,6 +43,46 @@ const Index = () => {
     });
   };
 
+  const handleSelectTeam = (team: Team) => {
+    setCurrentTeam(team);
+  };
+
+  const handleLogout = () => {
+    setUser(null);
+    setCurrentTeam(null);
+    toast({
+      title: "로그아웃되었습니다",
+      description: "다시 로그인해주세요",
+    });
+  };
+
+  // 로그인하지 않은 상태
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-yellow-50 to-orange-100 flex items-center justify-center">
+        <Card className="w-full max-w-md border-0 shadow-xl bg-white/90 backdrop-blur-sm">
+          <CardHeader className="text-center">
+            <div className="flex items-center justify-center mb-4">
+              <Utensils className="w-8 h-8 text-orange-500 mr-2" />
+              <h1 className="text-2xl font-bold text-gradient">맛있는 점심</h1>
+            </div>
+            <CardTitle>로그인</CardTitle>
+            <CardDescription>점심 메뉴 추천 서비스에 오신 것을 환영합니다</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button 
+              onClick={() => setUser({ id: 'demo-user', name: '김머핀' })}
+              className="w-full gradient-food text-white font-semibold py-3 rounded-xl"
+              size="lg"
+            >
+              김머핀으로 로그인
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   if (currentTeam) {
     return <TeamDashboard team={currentTeam} setTeam={setCurrentTeam} />;
   }
@@ -63,16 +90,57 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-yellow-50 to-orange-100">
       <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <div className="flex items-center justify-center mb-4">
-            <Utensils className="w-12 h-12 text-orange-500 mr-3" />
-            <h1 className="text-5xl font-bold text-gradient">맛있는 점심</h1>
+        {/* Header with user info */}
+        <div className="flex justify-between items-center mb-8">
+          <div className="text-center flex-1">
+            <div className="flex items-center justify-center mb-4">
+              <Utensils className="w-12 h-12 text-orange-500 mr-3" />
+              <h1 className="text-5xl font-bold text-gradient">맛있는 점심</h1>
+            </div>
+            <p className="text-xl text-gray-600">
+              {user.name}님 환영합니다! 팀원들의 취향을 고려한 AI 점심 메뉴 추천 서비스
+            </p>
           </div>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            팀원들의 취향을 고려한 AI 점심 메뉴 추천 서비스
-          </p>
+          <Button 
+            variant="outline" 
+            onClick={handleLogout}
+            className="ml-4"
+          >
+            <LogOut className="w-4 h-4 mr-2" />
+            로그아웃
+          </Button>
         </div>
+
+        {/* Existing Teams */}
+        {teams.length > 0 && (
+          <div className="mb-12">
+            <h2 className="text-2xl font-bold text-gray-800 mb-6">내 팀 목록</h2>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {teams.map((team) => (
+                <Card 
+                  key={team.id} 
+                  className="border-0 shadow-lg bg-white/90 backdrop-blur-sm cursor-pointer hover:shadow-xl transition-shadow"
+                  onClick={() => handleSelectTeam(team)}
+                >
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Users className="w-5 h-5 text-orange-500" />
+                      {team.name}
+                    </CardTitle>
+                    <CardDescription>
+                      팀원 {team.members.length}명 • 이번 주 {team.eatenFoods.length}개 메뉴
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Button className="w-full gradient-food text-white font-semibold">
+                      팀 입장하기
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Features */}
         <div className="grid md:grid-cols-3 gap-6 mb-12">
@@ -119,7 +187,7 @@ const Index = () => {
             <Card className="border-0 shadow-xl bg-white/90 backdrop-blur-sm">
               <CardHeader className="text-center">
                 <CardTitle className="text-2xl font-bold text-gray-800">
-                  시작하기
+                  새 팀 만들기
                 </CardTitle>
                 <CardDescription>
                   새로운 팀을 만들어 점심 메뉴 추천을 받아보세요

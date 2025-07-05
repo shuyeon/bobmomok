@@ -6,17 +6,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Plus, Sparkles, RefreshCw, Users, History } from "lucide-react";
+import { ArrowLeft, Plus, Sparkles, RefreshCw, Users, History, Copy, Share } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useUser, Team } from "@/contexts/UserContext";
 import TeamMemberCard from "./TeamMemberCard";
 import RecommendationResult from "./RecommendationResult";
-
-interface Team {
-  id: string;
-  name: string;
-  members: TeamMember[];
-  eatenFoods: string[];
-}
 
 interface TeamMember {
   id: string;
@@ -33,12 +27,15 @@ interface Props {
 }
 
 const TeamDashboard = ({ team, setTeam }: Props) => {
+  const { updateTeam } = useUser();
   const [newMemberName, setNewMemberName] = useState("");
   const [showAddMember, setShowAddMember] = useState(false);
   const [recommendation, setRecommendation] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [newFood, setNewFood] = useState("");
   const { toast } = useToast();
+
+  const inviteLink = `${window.location.origin}/join/${team.id}`;
 
   const handleAddMember = () => {
     if (!newMemberName.trim()) {
@@ -58,11 +55,12 @@ const TeamDashboard = ({ team, setTeam }: Props) => {
       temporaryDislikes: [],
     };
 
-    setTeam({
+    const updatedTeam = {
       ...team,
       members: [...team.members, newMember],
-    });
+    };
 
+    updateTeam(updatedTeam);
     setNewMemberName("");
     setShowAddMember(false);
     
@@ -73,12 +71,28 @@ const TeamDashboard = ({ team, setTeam }: Props) => {
   };
 
   const updateMember = (updatedMember: TeamMember) => {
-    setTeam({
+    const updatedTeam = {
       ...team,
       members: team.members.map(member => 
         member.id === updatedMember.id ? updatedMember : member
       ),
-    });
+    };
+    updateTeam(updatedTeam);
+  };
+
+  const copyInviteLink = async () => {
+    try {
+      await navigator.clipboard.writeText(inviteLink);
+      toast({
+        title: "초대 링크가 복사되었습니다! 📋",
+        description: "팀원들에게 링크를 공유해보세요.",
+      });
+    } catch (err) {
+      toast({
+        title: "복사에 실패했습니다",
+        variant: "destructive",
+      });
+    }
   };
 
   const getRecommendation = async () => {
@@ -108,8 +122,10 @@ const TeamDashboard = ({ team, setTeam }: Props) => {
     }, 2000);
   };
 
-  const addEatenFood = () => {
-    if (!newFood.trim()) {
+  const addEatenFood = (foodName?: string) => {
+    const foodToAdd = foodName || newFood;
+    
+    if (!foodToAdd.trim()) {
       toast({
         title: "음식 이름을 입력해주세요",
         variant: "destructive",
@@ -117,16 +133,20 @@ const TeamDashboard = ({ team, setTeam }: Props) => {
       return;
     }
 
-    setTeam({
+    const updatedTeam = {
       ...team,
-      eatenFoods: [...team.eatenFoods, newFood],
-    });
+      eatenFoods: [...team.eatenFoods, foodToAdd],
+    };
+    
+    updateTeam(updatedTeam);
 
-    setNewFood("");
+    if (!foodName) {
+      setNewFood("");
+    }
     
     toast({
       title: "오늘의 메뉴가 등록되었습니다! 📝",
-      description: `${newFood}가(이) 이번 주 메뉴에 추가되었습니다.`,
+      description: `${foodToAdd}가(이) 이번 주 메뉴에 추가되었습니다.`,
     });
   };
 
@@ -148,6 +168,16 @@ const TeamDashboard = ({ team, setTeam }: Props) => {
               <p className="text-gray-600">팀원 {team.members.length}명</p>
             </div>
           </div>
+          <div className="flex gap-2">
+            <Button
+              onClick={copyInviteLink}
+              variant="outline"
+              className="flex items-center gap-2"
+            >
+              <Share className="w-4 h-4" />
+              초대 링크
+            </Button>
+          </div>
         </div>
 
         <Tabs defaultValue="members" className="space-y-6">
@@ -167,6 +197,33 @@ const TeamDashboard = ({ team, setTeam }: Props) => {
           </TabsList>
 
           <TabsContent value="members" className="space-y-6">
+            {/* Invite Link */}
+            <Card className="border-0 shadow-lg bg-white/90 backdrop-blur-sm">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Share className="w-5 h-5 text-blue-500" />
+                  팀원 초대
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex gap-2">
+                  <Input
+                    value={inviteLink}
+                    readOnly
+                    className="flex-1"
+                  />
+                  <Button
+                    onClick={copyInviteLink}
+                    variant="outline"
+                    className="flex items-center gap-2"
+                  >
+                    <Copy className="w-4 h-4" />
+                    복사
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
             {/* Add Member */}
             <Card className="border-0 shadow-lg bg-white/90 backdrop-blur-sm">
               <CardHeader>
@@ -275,7 +332,7 @@ const TeamDashboard = ({ team, setTeam }: Props) => {
             {recommendation && (
               <RecommendationResult 
                 recommendation={recommendation}
-                onAddToHistory={addEatenFood}
+                onAddToHistory={() => addEatenFood(recommendation.split(' - ')[0])}
               />
             )}
           </TabsContent>
@@ -313,7 +370,7 @@ const TeamDashboard = ({ team, setTeam }: Props) => {
                       onChange={(e) => setNewFood(e.target.value)}
                       onKeyPress={(e) => e.key === 'Enter' && addEatenFood()}
                     />
-                    <Button onClick={addEatenFood}>추가</Button>
+                    <Button onClick={() => addEatenFood()}>추가</Button>
                   </div>
                 </div>
               </CardContent>
