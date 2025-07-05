@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -28,6 +27,7 @@ interface Props {
 
 const TeamDashboard = ({ team, setTeam }: Props) => {
   const { updateTeam } = useUser();
+  const [currentTeam, setCurrentTeam] = useState<Team>(team);
   const [newMemberName, setNewMemberName] = useState("");
   const [showAddMember, setShowAddMember] = useState(false);
   const [recommendation, setRecommendation] = useState<string | null>(null);
@@ -35,7 +35,12 @@ const TeamDashboard = ({ team, setTeam }: Props) => {
   const [newFood, setNewFood] = useState("");
   const { toast } = useToast();
 
-  const inviteLink = `${window.location.origin}/join/${team.id}`;
+  const inviteLink = `${window.location.origin}/join/${currentTeam.id}`;
+
+  // 팀 상태 변경 시 부모 컴포넌트에도 알림
+  useEffect(() => {
+    updateTeam(currentTeam);
+  }, [currentTeam, updateTeam]);
 
   const handleAddMember = () => {
     if (!newMemberName.trim()) {
@@ -56,11 +61,11 @@ const TeamDashboard = ({ team, setTeam }: Props) => {
     };
 
     const updatedTeam = {
-      ...team,
-      members: [...team.members, newMember],
+      ...currentTeam,
+      members: [...currentTeam.members, newMember],
     };
 
-    updateTeam(updatedTeam);
+    setCurrentTeam(updatedTeam);
     setNewMemberName("");
     setShowAddMember(false);
     
@@ -72,12 +77,12 @@ const TeamDashboard = ({ team, setTeam }: Props) => {
 
   const updateMember = (updatedMember: TeamMember) => {
     const updatedTeam = {
-      ...team,
-      members: team.members.map(member => 
+      ...currentTeam,
+      members: currentTeam.members.map(member => 
         member.id === updatedMember.id ? updatedMember : member
       ),
     };
-    updateTeam(updatedTeam);
+    setCurrentTeam(updatedTeam);
   };
 
   const copyInviteLink = async () => {
@@ -98,14 +103,42 @@ const TeamDashboard = ({ team, setTeam }: Props) => {
   const getRecommendation = async () => {
     setIsLoading(true);
     
-    // AI 추천 로직 시뮬레이션
-    const possibleRecommendations = [
+    // 모든 팀원의 선호도와 기피 음식을 고려한 추천 로직
+    const allPreferences = currentTeam.members.flatMap(member => [
+      ...member.preferences,
+      ...member.temporaryPreferences.map(tp => tp.food)
+    ]);
+    
+    const allDislikes = currentTeam.members.flatMap(member => [
+      ...member.dislikes,
+      ...member.temporaryDislikes.map(td => td.food)
+    ]);
+
+    // 선호도/기피 정보가 있는 경우의 추천
+    const recommendationsWithPreferences = [
       "콩국수 - 시원하고 칼로리가 낮으며, 회나 치킨이 들어가지 않은 건강한 메뉴입니다",
       "냉우동 - 시원한 국물과 쫄깃한 면발이 더운 날씨에 완벽한 선택입니다",
       "포케볼 - 신선한 채소와 단백질이 균형잡힌 건강한 하와이안 메뉴입니다",
       "냉면 - 시원한 육수와 면발로 여름철에 인기가 높은 한국 전통 메뉴입니다",
       "샐러드 파스타 - 가벼우면서도 포만감을 주는 이탈리안 메뉴입니다"
     ];
+
+    // 선호도/기피 정보가 없는 경우의 랜덤 추천
+    const randomRecommendations = [
+      "비빔밥 - 다양한 나물과 고기가 어우러진 균형잡힌 한식 메뉴입니다",
+      "파스타 - 크림이나 토마토 소스로 맛있게 즐길 수 있는 이탈리아 요리입니다",
+      "볶음밥 - 간단하면서도 맛있는 중식 요리로 든든한 한 끼가 됩니다",
+      "김치찌개 - 매콤하고 시원한 국물이 일품인 한국의 대표 찌개입니다",
+      "돈까스 - 바삭한 튀김옷과 부드러운 고기가 조화로운 일식 메뉴입니다",
+      "햄버거 - 패티와 신선한 야채가 들어간 서양식 간편 식사입니다",
+      "떡볶이 - 매콤달콤한 소스에 쫄깃한 떡이 어우러진 한국 분식입니다"
+    ];
+
+    // 선호도나 기피 정보가 있으면 고려한 추천, 없으면 랜덤 추천
+    const hasPreferencesOrDislikes = allPreferences.length > 0 || allDislikes.length > 0;
+    const possibleRecommendations = hasPreferencesOrDislikes 
+      ? recommendationsWithPreferences 
+      : randomRecommendations;
 
     // 2초 후 추천 결과 반환
     setTimeout(() => {
@@ -117,7 +150,9 @@ const TeamDashboard = ({ team, setTeam }: Props) => {
       
       toast({
         title: "메뉴 추천 완료! 🍽️",
-        description: "AI가 팀원들의 취향을 고려하여 메뉴를 추천했습니다.",
+        description: hasPreferencesOrDislikes 
+          ? "AI가 팀원들의 취향을 고려하여 메뉴를 추천했습니다."
+          : "랜덤으로 메뉴를 추천했습니다.",
       });
     }, 2000);
   };
@@ -134,11 +169,11 @@ const TeamDashboard = ({ team, setTeam }: Props) => {
     }
 
     const updatedTeam = {
-      ...team,
-      eatenFoods: [...team.eatenFoods, foodToAdd],
+      ...currentTeam,
+      eatenFoods: [...currentTeam.eatenFoods, foodToAdd],
     };
     
-    updateTeam(updatedTeam);
+    setCurrentTeam(updatedTeam);
 
     if (!foodName) {
       setNewFood("");
@@ -164,8 +199,8 @@ const TeamDashboard = ({ team, setTeam }: Props) => {
               <ArrowLeft className="w-5 h-5" />
             </Button>
             <div>
-              <h1 className="text-3xl font-bold text-gray-800">{team.name}</h1>
-              <p className="text-gray-600">팀원 {team.members.length}명</p>
+              <h1 className="text-3xl font-bold text-gray-800">{currentTeam.name}</h1>
+              <p className="text-gray-600">팀원 {currentTeam.members.length}명</p>
             </div>
           </div>
           <div className="flex gap-2">
@@ -270,7 +305,7 @@ const TeamDashboard = ({ team, setTeam }: Props) => {
 
             {/* Members List */}
             <div className="grid gap-4">
-              {team.members.length === 0 ? (
+              {currentTeam.members.length === 0 ? (
                 <Card className="border-0 shadow-lg bg-white/90 backdrop-blur-sm">
                   <CardContent className="text-center py-12">
                     <Users className="w-12 h-12 text-gray-400 mx-auto mb-4" />
@@ -279,7 +314,7 @@ const TeamDashboard = ({ team, setTeam }: Props) => {
                   </CardContent>
                 </Card>
               ) : (
-                team.members.map((member) => (
+                currentTeam.members.map((member) => (
                   <TeamMemberCard
                     key={member.id}
                     member={member}
@@ -291,6 +326,7 @@ const TeamDashboard = ({ team, setTeam }: Props) => {
           </TabsContent>
 
           <TabsContent value="recommendation" className="space-y-6">
+            
             <Card className="border-0 shadow-lg bg-white/90 backdrop-blur-sm">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -304,7 +340,7 @@ const TeamDashboard = ({ team, setTeam }: Props) => {
               <CardContent className="space-y-4">
                 <Button 
                   onClick={getRecommendation}
-                  disabled={isLoading || team.members.length === 0}
+                  disabled={isLoading}
                   className="w-full gradient-food text-white font-semibold py-3 rounded-xl hover:opacity-90 transition-all duration-200"
                   size="lg"
                 >
@@ -320,12 +356,6 @@ const TeamDashboard = ({ team, setTeam }: Props) => {
                     </>
                   )}
                 </Button>
-
-                {team.members.length === 0 && (
-                  <p className="text-sm text-gray-500 text-center">
-                    팀원을 먼저 추가해주세요
-                  </p>
-                )}
               </CardContent>
             </Card>
 
@@ -338,6 +368,7 @@ const TeamDashboard = ({ team, setTeam }: Props) => {
           </TabsContent>
 
           <TabsContent value="history" className="space-y-6">
+            
             <Card className="border-0 shadow-lg bg-white/90 backdrop-blur-sm">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -346,11 +377,11 @@ const TeamDashboard = ({ team, setTeam }: Props) => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {team.eatenFoods.length === 0 ? (
+                {currentTeam.eatenFoods.length === 0 ? (
                   <p className="text-center text-gray-500 py-8">정보 x</p>
                 ) : (
                   <div className="flex flex-wrap gap-2">
-                    {team.eatenFoods.map((food, index) => (
+                    {currentTeam.eatenFoods.map((food, index) => (
                       <Badge key={index} variant="secondary" className="text-sm">
                         {food}
                       </Badge>

@@ -3,16 +3,20 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { PlusCircle, Users, Utensils, Sparkles, LogOut } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { PlusCircle, Users, Utensils, Sparkles, LogOut, User as UserIcon, Heart, X, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useUser, Team } from "@/contexts/UserContext";
 import TeamDashboard from "@/components/TeamDashboard";
 
 const Index = () => {
-  const { user, teams, addTeam, setUser } = useUser();
+  const { user, teams, addTeam, setUser, updateUser } = useUser();
   const [currentTeam, setCurrentTeam] = useState<Team | null>(null);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [teamName, setTeamName] = useState("");
+  const [showUserPreferences, setShowUserPreferences] = useState(false);
+  const [newPreference, setNewPreference] = useState("");
+  const [newDislike, setNewDislike] = useState("");
   const { toast } = useToast();
 
   const handleCreateTeam = () => {
@@ -56,6 +60,58 @@ const Index = () => {
     });
   };
 
+  const addUserPreference = () => {
+    if (!newPreference.trim() || !user) return;
+
+    const updatedUser = {
+      ...user,
+      preferences: [...user.preferences, newPreference]
+    };
+
+    updateUser(updatedUser);
+    setNewPreference("");
+    
+    toast({
+      title: "선호 음식이 추가되었습니다! ❤️",
+    });
+  };
+
+  const addUserDislike = () => {
+    if (!newDislike.trim() || !user) return;
+
+    const updatedUser = {
+      ...user,
+      dislikes: [...user.dislikes, newDislike]
+    };
+
+    updateUser(updatedUser);
+    setNewDislike("");
+    
+    toast({
+      title: "기피 음식이 추가되었습니다! 🚫",
+    });
+  };
+
+  const removeUserPreference = (index: number) => {
+    if (!user) return;
+    
+    const updatedUser = {
+      ...user,
+      preferences: user.preferences.filter((_, i) => i !== index)
+    };
+    updateUser(updatedUser);
+  };
+
+  const removeUserDislike = (index: number) => {
+    if (!user) return;
+    
+    const updatedUser = {
+      ...user,
+      dislikes: user.dislikes.filter((_, i) => i !== index)
+    };
+    updateUser(updatedUser);
+  };
+
   // 로그인하지 않은 상태
   if (!user) {
     return (
@@ -71,7 +127,7 @@ const Index = () => {
           </CardHeader>
           <CardContent>
             <Button 
-              onClick={() => setUser({ id: 'demo-user', name: '김머핀' })}
+              onClick={() => setUser({ id: 'demo-user', name: '김머핀', preferences: [], dislikes: [] })}
               className="w-full gradient-food text-white font-semibold py-3 rounded-xl"
               size="lg"
             >
@@ -109,6 +165,86 @@ const Index = () => {
             <LogOut className="w-4 h-4 mr-2" />
             로그아웃
           </Button>
+        </div>
+
+        {/* User Preferences */}
+        <div className="mb-12">
+          <Card className="border-0 shadow-lg bg-white/90 backdrop-blur-sm">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <UserIcon className="w-5 h-5 text-blue-500" />
+                나의 선호/기피 음식
+              </CardTitle>
+              <CardDescription>
+                여기서 설정한 선호도는 새로 생성하는 팀에 자동으로 반영됩니다
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Preferences */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <Heart className="w-4 h-4 text-red-500" />
+                  <Label className="font-semibold">선호 음식</Label>
+                </div>
+                
+                <div className="flex flex-wrap gap-2">
+                  {user.preferences.map((pref, index) => (
+                    <Badge key={index} className="bg-green-100 text-green-800 hover:bg-green-200">
+                      {pref}
+                      <button
+                        onClick={() => removeUserPreference(index)}
+                        className="ml-2 hover:text-red-600"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </Badge>
+                  ))}
+                </div>
+
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="예: 시원한 음식"
+                    value={newPreference}
+                    onChange={(e) => setNewPreference(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && addUserPreference()}
+                  />
+                  <Button onClick={addUserPreference}>추가</Button>
+                </div>
+              </div>
+
+              {/* Dislikes */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <X className="w-4 h-4 text-red-500" />
+                  <Label className="font-semibold">기피 음식</Label>
+                </div>
+                
+                <div className="flex flex-wrap gap-2">
+                  {user.dislikes.map((dislike, index) => (
+                    <Badge key={index} className="bg-red-100 text-red-800 hover:bg-red-200">
+                      {dislike}
+                      <button
+                        onClick={() => removeUserDislike(index)}
+                        className="ml-2 hover:text-red-600"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </Badge>
+                  ))}
+                </div>
+
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="예: 칼로리가 높은 음식"
+                    value={newDislike}
+                    onChange={(e) => setNewDislike(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && addUserDislike()}
+                  />
+                  <Button onClick={addUserDislike}>추가</Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Existing Teams */}

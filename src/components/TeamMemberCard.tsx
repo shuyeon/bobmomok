@@ -43,6 +43,7 @@ const TeamMemberCard = ({ member, onUpdate }: Props) => {
         : member.temporaryPreferences,
     };
 
+    console.log('Adding preference, updated member:', updatedMember);
     onUpdate(updatedMember);
     setNewPreference("");
     setIsOneDayPref(false);
@@ -65,6 +66,7 @@ const TeamMemberCard = ({ member, onUpdate }: Props) => {
         : member.temporaryDislikes,
     };
 
+    console.log('Adding dislike, updated member:', updatedMember);
     onUpdate(updatedMember);
     setNewDislike("");
     setIsOneDayDislike(false);
